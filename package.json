@@ -1,0 +1,22 @@
+{
+  "name": "korean-name-generator",
+  "version": "1.0.0",
+  "description": "Generates random but reasonable Korean names",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/agemor/korean-name-generator.git"
+  },
+  "keywords": [
+    "Korean"
+  ],
+  "author": "HyunJun Kim",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/agemor/korean-name-generator/issues"
+  },
+  "homepage": "https://github.com/agemor/korean-name-generator#readme"
+}
