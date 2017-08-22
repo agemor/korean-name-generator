@@ -1,8 +1,8 @@
 {
   "name": "korean-name-generator",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Generates random but reasonable Korean names",
-  "main": "index.js",
+  "main": "./src/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node ./src/index.js"
