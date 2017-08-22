@@ -1,90 +1,108 @@
-var maleNames = require('../database/male-names.json');
+var trainedData = require('./trained-data.js');
 
-var r = train(maleNames);
-console.log(generate(r));
+console.log(generate());
 
-function generate(nameData) {
+/**
+ * 랜덤한 한국 이름을 생성한다.
+ */
+function generate() {
 
-    let choseong = 0, jungseong = 0, jongseong = 0;
-    
     let ensure = (n) => n == undefined ? 0 : n; 
 
-    // 초성 고르기
-    sum = 0;
-    for (let i = 0; i < 19; i++) {
-        sum += ensure(nameData[0][i]);
-    }
-    let seed = Math.random() * sum;
-    for (let i = 0; i < 19; i++) {
-        if ((seed -= ensure(nameData[0][i])) <= 0) {
-            choseong = i;
-            break;
+    // 요소들의 가중치에 비례한 확률로 랜덤 뽑기
+    let pick = (count, item) => {
+
+        let sum = 0;
+        let selected = 0;
+
+        for (let i = 0; i < count; i++) {
+            sum += item(i);
         }
-    }
-    
-    // 중성 고르기
-    sum = 0;
-    for (let i = 0; i < 21; i++) {
-        sum += ensure(nameData[1][choseong * 21 + i]);
-    }
 
-    seed = Math.random() * sum;
-    for (let i = 0; i < 21; i++) {
-        if ((seed -= ensure(nameData[1][choseong * 21 + i])) <= 0) {
-            jungseong = i;
-            break;
+        let pivot = Math.random() * sum;
+
+        for (let i = 0; i < count; i++) {
+            if ((pivot -= item(i)) <= 0) {
+                selected = i;
+                break;
+            }
         }
+
+        return selected;
     }
 
-    // sum 다시 계산
-    sum = 0;
-    for (let i = 0; i < 28; i++) {
-        sum += ensure(nameData[2][jungseong * 28 + i]) * ensure(nameData[3][choseong * 28 + i]);
+    // 랜덤으로 음절 생성
+    let pickSyllable = (set) => {
+         
+        let choseong = pick(19, (n) => ensure(trainedData.firstNames[set][0][n]));
+        let jungseong = pick(21, (n) => ensure(trainedData.firstNames[set][1][choseong * 21 + n]));
+        let jongseong = pick(28, (n) => ensure(trainedData.firstNames[set][2][jungseong * 28 + n]) * ensure(trainedData.firstNames[set][3][choseong * 28 + n]));
+
+        return constructFromJamoIndex([choseong, jungseong, jongseong]);
     }
 
-    // 종성 고르기
-    seed = Math.random() * sum;
-    for (let i = 0; i < 28; i++) {
-        if ((seed -= ensure(nameData[2][jungseong * 28 + i]) * ensure(nameData[3][choseong * 28 + i])) <= 0) {
-            jongseong = i;
-            break;
-        }
-    }
-    console.log([choseong, jungseong, jongseong]);
-    let syllable = constructFromJamoIndex([choseong, jungseong, jongseong]);
+    let pickLastName = () => {
 
-    return syllable;
+        let lastNameIndex = pick(trainedData.lastNames.length, (n) => trainedData.lastNameFrequency[n]);
+
+        return String.fromCharCode(trainedData.lastNames[lastNameIndex] + 0xAC00);
+    }
+
+    return pickLastName() + pickSyllable(0) + pickSyllable(1);
 }
 
+
+/**
+ * 이름 리스트를 토대로 통계적 학습 데이터를 생성한다.
+ * 
+ * @param {array} nameList 
+ */
 function train(nameList) {
 
-    let trainedNameData = [[], [], [], []];
+    let trainedNameData = [[[], [], [], []], [[], [], [], []]];
 
-    let update = (array, index) => {
+    let increase = (array, index) => {
         array[index] = (array[index] == undefined ? 0 : array[index] + 1);
-    }
+    };
+
+    let process = (set, jamo) => {
+        increase(trainedNameData[set][0], jamo[0]);
+        increase(trainedNameData[set][1], jamo[0] * 21 + jamo[1]);
+        increase(trainedNameData[set][2], jamo[1] * 28 + jamo[2]);
+        increase(trainedNameData[set][3], jamo[0] * 28 + jamo[2]);
+    };
 
     for (let i = 0; i < nameList.length; i++) {
+
         let firstName = nameList[i].substring(1);
+
         let cheot = firstName.charAt(0);
         let du = firstName.length > 0 ? firstName.charAt(1) : "";
 
         let cheotJamo = resolveToJamoIndex(cheot);
-        if (cheotJamo == null) continue;
+        let duJamo = resolveToJamoIndex(du);
 
-        update(trainedNameData[0], cheotJamo[0]);
-        update(trainedNameData[1], cheotJamo[0] * 21 + cheotJamo[1]);
-        update(trainedNameData[2], cheotJamo[1] * 28 + cheotJamo[2]);
-        update(trainedNameData[3], cheotJamo[0] * 28 + cheotJamo[2]);
+        if (cheotJamo != null) process(0, cheotJamo);
+        if (duJamo != null) process(1, duJamo);
     }
 
     return trainedNameData;
 }
 
+/**
+ * 자모 배열로부터 음절을 생성한다.
+ * 
+ * @param {array} jamoIndex 
+ */
 function constructFromJamoIndex(jamoIndex) {
     return String.fromCharCode(0xAC00 + 28 * 21 * jamoIndex[0] + 28 * jamoIndex[1] + jamoIndex[2]);
 }
 
+/**
+ * 음절로부터 자보 배열을 생성한다.
+ * 
+ * @param {string} syllable 
+ */
 function resolveToJamoIndex(syllable) {
 
     let code = syllable.charCodeAt(0) - 0xAC00;
