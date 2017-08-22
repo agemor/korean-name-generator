@@ -1,11 +1,13 @@
 var trainedData = require('./trained-data.js');
 
-console.log(generate());
+trainedData.firstNames = uncompressEmptyPart(trainedData.firstNames);
 
 /**
  * 랜덤한 한국 이름을 생성한다.
+ * 
+ * @param {boolean} isMale 
  */
-function generate() {
+function generate(isMale = true) {
 
     let ensure = (n) => n == undefined ? 0 : n; 
 
@@ -34,9 +36,9 @@ function generate() {
     // 랜덤으로 음절 생성
     let pickSyllable = (set) => {
          
-        let choseong = pick(19, (n) => ensure(trainedData.firstNames[set][0][n]));
-        let jungseong = pick(21, (n) => ensure(trainedData.firstNames[set][1][choseong * 21 + n]));
-        let jongseong = pick(28, (n) => ensure(trainedData.firstNames[set][2][jungseong * 28 + n]) * ensure(trainedData.firstNames[set][3][choseong * 28 + n]));
+        let choseong = pick(19, (n) => ensure(trainedData.firstNames[isMale ? 0 : 1][set][0][n]));
+        let jungseong = pick(21, (n) => ensure(trainedData.firstNames[isMale ? 0 : 1][set][1][choseong * 21 + n]));
+        let jongseong = pick(28, (n) => ensure(trainedData.firstNames[isMale ? 0 : 1][set][2][jungseong * 28 + n]) * ensure(trainedData.firstNames[isMale ? 0 : 1][set][3][choseong * 28 + n]));
 
         return constructFromJamoIndex([choseong, jungseong, jongseong]);
     }
@@ -86,7 +88,72 @@ function train(nameList) {
         if (duJamo != null) process(1, duJamo);
     }
 
-    return trainedNameData;
+    return compressEmptyPart(trainedNameData);
+}
+
+/**
+ * 빈 공간이 많은 배열을 압축한다.
+ * 
+ * @param {array} array 
+ */
+function compressEmptyPart(array) {
+
+    let compressedArray = [];
+    let emptyCount = 0;
+
+    for (let i = 0; i < array.length; i++) {
+
+        if (array[i] == null) {
+            emptyCount++;
+        } 
+        
+        else if (array[i] instanceof Array) {
+            compressedArray.push(compressEmptyPart(array[i]));
+        } 
+        
+        else {
+            if (emptyCount > 0) {
+                compressedArray.push(-emptyCount);
+                emptyCount = 0;
+            }
+            compressedArray.push(array[i]);
+        }
+    }
+
+    return compressedArray;
+}
+
+/**
+ * 압축된 배열을 원래 상태로 되돌린다.
+ * 
+ * @param {array} array 
+ */
+function uncompressEmptyPart(array) {
+
+    let originalArray = [];
+
+    for (let i = 0; i < array.length; i++) {
+
+        if (array[i] instanceof Array) {
+            originalArray.push(uncompressEmptyPart(array[i]));
+        }
+        
+        else {
+
+            if (array[i] >= 0) {
+                originalArray.push(array[i]);
+            }
+            
+            else {
+                
+                for (let j = 0; j < -array[i]; j++) {
+                    originalArray.push(0);
+                }
+            }
+        }
+    }
+
+    return originalArray;
 }
 
 /**
@@ -119,3 +186,5 @@ function resolveToJamoIndex(syllable) {
 
     return [choseong, jungseong, jongseong];
 }
+
+module.exports = {generate: generate, train: train};
