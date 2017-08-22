@@ -7,7 +7,7 @@ trainedData.firstNames = uncompressEmptyPart(trainedData.firstNames);
  * 
  * @param {boolean} isMale 
  */
-function generate(isMale = true) {
+function generate(trainedDataMatrix) {
 
     let ensure = (n) => n == undefined ? 0 : n; 
 
@@ -36,9 +36,9 @@ function generate(isMale = true) {
     // 랜덤으로 음절 생성
     let pickSyllable = (set) => {
          
-        let choseong = pick(19, (n) => ensure(trainedData.firstNames[isMale ? 0 : 1][set][0][n]));
-        let jungseong = pick(21, (n) => ensure(trainedData.firstNames[isMale ? 0 : 1][set][1][choseong * 21 + n]));
-        let jongseong = pick(28, (n) => ensure(trainedData.firstNames[isMale ? 0 : 1][set][2][jungseong * 28 + n]) * ensure(trainedData.firstNames[isMale ? 0 : 1][set][3][choseong * 28 + n]));
+        let choseong = pick(19, (n) => ensure(trainedDataMatrix[set][0][n]));
+        let jungseong = pick(21, (n) => ensure(trainedDataMatrix[set][1][choseong * 21 + n]));
+        let jongseong = pick(28, (n) => ensure(trainedDataMatrix[set][2][jungseong * 28 + n]) * ensure(trainedDataMatrix[set][3][choseong * 28 + n]));
 
         return constructFromJamoIndex([choseong, jungseong, jongseong]);
     }
@@ -53,18 +53,21 @@ function generate(isMale = true) {
     return pickLastName() + pickSyllable(0) + pickSyllable(1);
 }
 
+function generateByDefault(isMale = true) {
+    return generate(trainedData.firstNames[isMale ? 0 : 1]);
+}
 
 /**
  * 이름 리스트를 토대로 통계적 학습 데이터를 생성한다.
  * 
  * @param {array} nameList 
  */
-function train(nameList) {
+function train(nameList, compress = false) {
 
     let trainedNameData = [[[], [], [], []], [[], [], [], []]];
 
     let increase = (array, index) => {
-        array[index] = (array[index] == undefined ? 0 : array[index] + 1);
+        array[index] = (array[index] == undefined ? 1 : array[index] + 1);
     };
 
     let process = (set, jamo) => {
@@ -88,7 +91,7 @@ function train(nameList) {
         if (duJamo != null) process(1, duJamo);
     }
 
-    return compressEmptyPart(trainedNameData);
+    return compress ? compressEmptyPart(trainedNameData) : trainedNameData;
 }
 
 /**
@@ -187,4 +190,4 @@ function resolveToJamoIndex(syllable) {
     return [choseong, jungseong, jongseong];
 }
 
-module.exports = {generate: generate, train: train};
+module.exports = {generate: generateByDefault, generateCustom: generate, train: train};
