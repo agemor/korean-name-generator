@@ -1,4 +1,7 @@
-# Korean Name Generator
+# Korean Name Generator [![npm][npm-image]][npm-url]
+
+[npm-image]: https://img.shields.io/npm/v/korean-name-generator.svg
+[npm-url]: https://npmjs.org/package/korean-name-generator
 
 한국어 이름을 랜덤으로 작명해 주는 라이브러리입니다. 남자 이름과 여자 이름 중 하나를 지정하면 그에 어울리는 이름이 생성됩니다.
 
