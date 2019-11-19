@@ -9,7 +9,7 @@ trainedData.firstNames = uncompressEmptyPart(trainedData.firstNames);
  */
 function generate(trainedDataMatrix) {
 
-    let ensure = (n) => n == undefined ? 0 : n; 
+    let ensure = (n) => n == undefined ? 0 : n;
 
     // 요소들의 가중치에 비례한 확률로 랜덤 뽑기
     let pick = (count, item) => {
@@ -35,7 +35,7 @@ function generate(trainedDataMatrix) {
 
     // 랜덤으로 음절 생성
     let pickSyllable = (set) => {
-         
+
         let choseong = pick(19, (n) => ensure(trainedDataMatrix[set][0][n]));
         let jungseong = pick(21, (n) => ensure(trainedDataMatrix[set][1][choseong * 21 + n]));
         let jongseong = pick(28, (n) => ensure(trainedDataMatrix[set][2][jungseong * 28 + n]) * ensure(trainedDataMatrix[set][3][choseong * 28 + n]));
@@ -64,7 +64,20 @@ function generateByDefault(isMale = true) {
  */
 function train(nameList, compress = false) {
 
-    let trainedNameData = [[[], [], [], []], [[], [], [], []]];
+    let trainedNameData = [
+        [
+            [],
+            [],
+            [],
+            []
+        ],
+        [
+            [],
+            [],
+            [],
+            []
+        ]
+    ];
 
     let increase = (array, index) => {
         array[index] = (array[index] == undefined ? 1 : array[index] + 1);
@@ -108,13 +121,9 @@ function compressEmptyPart(array) {
 
         if (array[i] == null) {
             emptyCount++;
-        } 
-        
-        else if (array[i] instanceof Array) {
+        } else if (array[i] instanceof Array) {
             compressedArray.push(compressEmptyPart(array[i]));
-        } 
-        
-        else {
+        } else {
             if (emptyCount > 0) {
                 compressedArray.push(-emptyCount);
                 emptyCount = 0;
@@ -139,16 +148,12 @@ function uncompressEmptyPart(array) {
 
         if (array[i] instanceof Array) {
             originalArray.push(uncompressEmptyPart(array[i]));
-        }
-        
-        else {
+        } else {
 
             if (array[i] >= 0) {
                 originalArray.push(array[i]);
-            }
-            
-            else {
-                
+            } else {
+
                 for (let j = 0; j < -array[i]; j++) {
                     originalArray.push(0);
                 }
@@ -176,7 +181,7 @@ function constructFromJamoIndex(jamoIndex) {
 function resolveToJamoIndex(syllable) {
 
     let code = syllable.charCodeAt(0) - 0xAC00;
-    
+
     let choseong = Math.floor(((code - code % 28) / 28) / 21);
     let jungseong = Math.floor(((code - code % 28) / 28) % 21);
     let jongseong = code % 28;
@@ -190,4 +195,8 @@ function resolveToJamoIndex(syllable) {
     return [choseong, jungseong, jongseong];
 }
 
-module.exports = {generate: generateByDefault, generateCustom: generate, train: train};
+module.exports = {
+    generate: generateByDefault,
+    generateCustom: generate,
+    train: train
+};
