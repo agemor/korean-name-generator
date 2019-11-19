@@ -9,12 +9,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://https://github.com/agemor/korean-name-generator.git"
+    "url": "https://github.com/agemor/korean-name-generator.git"
   },
   "keywords": [
     "Korean"
   ],
-  "author": "HyunJun Kim",
+  "author": {
+    "name": "HyunJun Kim",
+    "email": "hyunjun.leo.kim@gmail.com"
+  },
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/agemor/korean-name-generator/issues"
