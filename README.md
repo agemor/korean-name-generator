@@ -5,6 +5,7 @@
 
 한국어 이름을 랜덤으로 작명해 주는 간단한 라이브러리입니다. 남자 이름과 여자 이름 중 하나를 지정하면 그에 어울리는 이름이 생성됩니다. 통계적 학습 방법을 사용하여 그럴듯한 이름이 만들어지도록 하였습니다.
 
+
 ## 설치하기
 ```
 npm install korean-name-generator
@@ -29,6 +30,14 @@ var femaleName = namer.generate(false);
 // 여자 이름
 "이세연", "홍승현", "최주원", "변지경", "최은아", "이민서", "권주안", "진하은", "김소경", "임수영", "정유진"
 ```
+
+## 다른 언어에서 사용하기
+현재 Python과 Go로 포팅된 버전이 존재합니다.
+
+| 환경   | 리포지토리                                                                | 개발                                     |
+|--------|---------------------------------------------------------------------------|------------------------------------------|
+| Python | [korean-name-generator](https://github.com/tinyjin/korean-name-generator) | [@tinyjin](https://github.com/tinyjin)   |
+| Go     | [korname](https://github.com/dfkdream/korname)                            | [@dfkdream](https://github.com/dfkdream) |
 
 ## 작명 원리
 

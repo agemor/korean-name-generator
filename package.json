@@ -1,6 +1,6 @@
 {
   "name": "korean-name-generator",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Generates random yet reasonable Korean names",
   "main": "./src/index.js",
   "scripts": {
